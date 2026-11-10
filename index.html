@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}</style>
+<title>මචං Menu</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Noto+Sans+Sinhala:wght@600;700&family=Oswald:wght@500;600&display=swap">
+<style>
+/* Layout: one dark card like the printed menu. Sticky category rail on top, ruled rows below, prices in fixed right-hand columns. */
+:root {
+  --bg: #14110d;
+  --surface: #1d1912;
+  --line: #3a3226;
+  --fg: #f1e9d8;
+  --muted: #a79c86;
+  --gold: #e9a820;
+  --gold-ink: #1a1405;
+  --display: 'Oswald', 'Arial Narrow', sans-serif;
+  --body: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --sinhala: 'Noto Sans Sinhala', 'Iskoola Pota', sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 4.5rem; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--body);
+  font-size: 16px;
+  line-height: 1.4;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 3rem;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto;
+  height: env(safe-area-inset-top, 0px);
+  z-index: 10;
+  background: var(--bg);
+}
+.wrap { max-width: 44rem; margin: 0 auto; }
+
+header { padding-block: 1.5rem 1rem; display: flex; align-items: flex-end; gap: 0.75rem; flex-wrap: wrap; }
+.brand { font-family: var(--sinhala); font-weight: 700; font-size: 3.25rem; line-height: 1.2; color: var(--gold); margin: 0; }
+.word { font-family: var(--display); font-weight: 500; font-size: 1.75rem; letter-spacing: 0.2em; padding-bottom: 0.6rem; }
+.note { flex-basis: 100%; margin: 0; color: var(--muted); font-size: 0.875rem; }
+
+.rail {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 20;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  padding-block: 0.625rem;
+  margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px)));
+  padding-inline: max(16px, env(safe-area-inset-left, 0px));
+}
+.chips { display: flex; gap: 0.5rem; overflow-x: auto; scrollbar-width: none; padding-bottom: 0.125rem; }
+.chips::-webkit-scrollbar { display: none; }
+.chips a {
+  flex: none;
+  color: var(--fg);
+  text-decoration: none;
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 0.875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.4rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+}
+.chips a:hover { border-color: var(--gold); }
+.chips a:focus-visible, #q:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.chips a[aria-current="true"] { background: var(--gold); color: var(--gold-ink); border-color: var(--gold); }
+
+.search { margin-block: 1rem 0.25rem; }
+#q {
+  width: 100%;
+  font: inherit;
+  color: var(--fg);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.7rem 0.9rem;
+}
+#q::placeholder { color: var(--muted); }
+
+section { margin-top: 2rem; }
+section h2 {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 1.375rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin: 0 0 0.25rem;
+  padding: 0.35rem 0.75rem;
+  background: var(--gold);
+  color: var(--gold-ink);
+  display: inline-block;
+}
+.sub { color: var(--muted); font-size: 0.8125rem; margin: 0.35rem 0 0; }
+.group { margin-top: 0.75rem; }
+.glabel { font-family: var(--display); font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); font-size: 0.9rem; margin: 1rem 0 0; }
+.colhead, .row { display: grid; grid-template-columns: minmax(0, 1fr) repeat(var(--n), var(--w, 4.75rem)); column-gap: 0.5rem; align-items: baseline; }
+.dense { --w: 3.35rem; column-gap: 0.3rem; }
+.dense .row, .dense.colhead { column-gap: 0.3rem; }
+.dense .price { font-size: 0.8125rem; }
+.dense .colhead { font-size: 0.625rem; letter-spacing: 0.03em; }
+.colhead { font-size: 0.6875rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); text-align: right; line-height: 1.2; padding-block: 0.5rem 0.25rem; }
+.row { padding-block: 0.65rem; border-bottom: 1px solid var(--line); }
+.name { min-width: 0; overflow-wrap: anywhere; }
+.name small { display: block; color: var(--muted); font-size: 0.8125rem; }
+.price { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+.row[hidden], section[hidden], .group[hidden] { display: none !important; }
+.empty { color: var(--muted); margin-top: 2rem; }
+footer { margin-top: 2.5rem; color: var(--muted); font-size: 0.875rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1 class="brand">මචං</h1>
+    <span class="word">MENU</span>
+    <p class="note">Prices in Sri Lankan rupees (LKR). A 10% service charge is added to all prices.</p>
+  </header>
+
+  <nav class="rail" aria-label="Menu categories"><div class="chips" id="chips"></div></nav>
+
+  <div class="search"><input id="q" type="search" placeholder="Search the menu, e.g. kottu, Lion, prawns" aria-label="Search the menu" autocomplete="off"></div>
+
+  <main id="menu"></main>
+  <p class="empty" id="empty" hidden>Nothing matches that search.</p>
+
+  <footer>Prices subject to 10% service charge. A 3% surcharge is added for credit and debit card payments.</footer>
+</div>
+
+<script>
+var R250 = "Regular|250 g", L500 = "Large|500 g";
+var SP = ["25 ml", "50 ml", "Half|bottle", "Bottle"];
+var SECTIONS = [
+  { id: "rice", title: "Rice & Noodles", groups: [{ cols: ["Regular", "Large"], items: [
+    ["Vegetable fried rice or noodles", "", [950, 1150]],
+    ["Chicken fried rice or noodles", "", [1200, 1700]],
+    ["Mixed fried rice or noodles", "", [1300, 1850]],
+    ["Seafood fried rice or noodles", "", [1450, 1950]],
+    ["Bite rice", "", [1450, 2200]],
+    ["Black pork curry & mangyokka", "", [1750, 2550]],
+    ["Black pork curry & yellow rice", "", [1750, 2550]],
+    ["මචං Special mix rice or noodles", "Regular 60 g / large 120 g of mixed meat", [1450, 2300]],
+    ["මචං Special seafood rice or noodles", "Regular 60 g / large 120 g of mixed meat", [1550, 2500]],
+    ["Nasigorang rice", "Beef, pork, prawns or fish", [1700, 2600]],
+    ["Shanghai rice", "", [1550, 1900]]
+  ]}]},
+  { id: "kottu", title: "Wok Kottu", groups: [{ cols: ["Regular", "Large"], items: [
+    ["Chicken kottu", "", [1150, 1700]],
+    ["Pork kottu", "", [1350, 1950]],
+    ["Beef kottu", "", [1450, 2000]],
+    ["Mix kottu", "", [1450, 2100]],
+    ["Seafood kottu", "", [1500, 2200]],
+    ["Cheese kottu", "", [1000, 1750]],
+    ["Cheese kottu (chicken)", "", [1300, 1950]]
+  ]}]},
+  { id: "chicken", title: "Chicken", groups: [
+    { cols: [""], items: [
+      ["Sausage platter", "", [1760]],
+      ["Mini combo deal", "", [1760]]
+    ]},
+    { cols: ["6 pcs", "10 pcs"], items: [["Chicken kochchi cutlets", "", [900, 1200]]]},
+    { cols: ["Regular|200 g", "Large|400 g"], items: [["Crispy chicken", "Boneless chicken", [1760, 3250]]]},
+    { cols: [R250, L500], items: [
+      ["Spicy chicken with mushrooms", "", [1760, 3250]],
+      ["Deep fried spicy chicken with chips", "", [1760, 3250]],
+      ["Pepper masala chicken", "", [1760, 3250]],
+      ["Daiyaa chicken", "", [1760, 3250]],
+      ["Devilled chicken", "", [1760, 3250]],
+      ["Stewed chicken", "", [1760, 3250]],
+      ["Fried chicken with garlic", "", [1760, 3250]]
+    ]}
+  ]},
+  { id: "pork", title: "Pork", groups: [{ cols: [R250, L500], items: [
+    ["Spicy pork with mushrooms", "", [1950, 3550]],
+    ["Saldari pan fried pork", "", [1950, 3550]],
+    ["Pepper masala pork", "", [1950, 3550]],
+    ["Deep fried spicy pork with chips", "", [1950, 3550]],
+    ["Daiyaa pork", "", [1950, 3550]],
+    ["Devilled pork", "", [1950, 3550]],
+    ["Stewed pork", "", [1950, 3550]],
+    ["Fried pork with garlic", "", [1950, 3550]]
+  ]}]},
+  { id: "beef", title: "Beef", groups: [{ cols: [R250, L500], items: [
+    ["Pepper masala beef", "", [2350, 4200]],
+    ["Deep fried spicy beef with chips", "", [2350, 4200]],
+    ["Daiyaa beef", "", [2350, 4200]],
+    ["Devilled beef", "", [2350, 4200]],
+    ["Stewed beef", "", [2350, 4200]],
+    ["Fried beef with garlic", "", [2350, 4200]],
+    ["Spicy beef with mushrooms", "", [2350, 4200]]
+  ]}]},
+  { id: "seafood", title: "Seafood", groups: [
+    { cols: ["Regular|150 g", "Large|300 g"], items: [["Hot butter cuttlefish", "", [1525, 2700]]]},
+    { cols: ["Regular", "Large"], items: [["Battered prawns", "", [1600, 2900]]]},
+    { cols: [R250, L500], items: [
+      ["Devilled fish", "Boneless fish", [2050, 3650]],
+      ["Stewed fish", "Boneless fish", [2050, 3650]]
+    ]}
+  ]},
+  { id: "veg", title: "Vegetable", groups: [
+    { cols: [""], items: [
+      ["Garlic kankun", "", [850]],
+      ["Boiled vegetables", "", [1000]],
+      ["Green salad", "", [850]],
+      ["French fries", "", [1150]],
+      ["Cashew nuts", "", [1650]]
+    ]},
+    { cols: ["Regular", "Large"], items: [["Hot butter mushroom", "", [1100, 1800]]]}
+  ]},
+  { id: "egg", title: "Egg", groups: [{ cols: [""], items: [
+    ["Omelette", "", [825]],
+    ["Omelette with chicken or cheese", "", [1050]]
+  ]}]},
+  { id: "soup", title: "Soup", groups: [{ cols: [""], items: [
+    ["Vegetable soup", "", [700]],
+    ["Cream of chicken soup", "", [800]],
+    ["Chicken and egg noodles soup", "", [850]]
+  ]}]},
+  { id: "juice", title: "Fresh Juices", groups: [{ cols: [""], items: [
+    ["Lime juice", "", [550]],
+    ["Papaya juice", "", [600]],
+    ["Pineapple", "", [650]],
+    ["Woodapple", "", [500]],
+    ["Carrot juice", "", [550]]
+  ]}]},
+  { id: "drinks", title: "Soft Drinks", groups: [{ cols: [""], items: [
+    ["Pepsi / Coke", "", [220]],
+    ["7UP / Sprite", "", [220]],
+    ["Soda", "", [180]],
+    ["Fanta", "", [180]],
+    ["Ginger ale", "", [230]],
+    ["Lemonade", "", [230]],
+    ["Ginger beer / EGB", "", [240]],
+    ["Tonic", "", [240]],
+    ["Orange juice (cordial)", "", [300]],
+    ["Lime soda", "", [650]],
+    ["Mineral water (small)", "", [140]],
+    ["Mineral water (large)", "", [190]],
+    ["Energy drink", "", [950]]
+  ]}]},
+  { id: "draught", title: "Draught Beer", groups: [
+    { label: "Mug", cols: ["270 ml", "500 ml"], items: [
+      ["Lion Lager", "", [360, 660]],
+      ["Carlsberg", "", [360, 660]],
+      ["Strong", "", [450, 850]]
+    ]},
+    { label: "Pitcher", cols: ["1.5 L"], items: [
+      ["Lion Lager", "", [2060]],
+      ["Carlsberg", "", [2060]],
+      ["Strong", "", [2520]]
+    ]},
+    { label: "Tower", cols: ["3 L"], items: [
+      ["Lion Lager", "", [4120]],
+      ["Carlsberg", "", [4120]],
+      ["Strong", "", [5040]]
+    ]}
+  ]},
+  { id: "cans", title: "Beer Cans", groups: [{ cols: [""], items: [
+    ["DCSL Lion Strong 330 ml", "", [560]],
+    ["DCSL Lion Stout 330 ml", "", [580]],
+    ["Lion Strong 500 ml", "", [880]],
+    ["Lion Stout 500 ml", "", [900]],
+    ["Ginger Blast 500 ml", "", [900]],
+    ["Ryder Apple 500 ml", "", [900]],
+    ["Lion Larger 500 ml", "", [700]],
+    ["Somersby Black Berry 500 ml", "", [780]],
+    ["Calesberg 500 ml", "", [730]],
+    ["Calesberg Special Brew 500 ml", "", [980]],
+    ["Guinness Stout 500 ml", "", [980]]
+  ]}]},
+  { id: "bottles", title: "Beer Bottles", groups: [{ cols: [""], items: [
+    ["Lion Lager 625 ml", "", [730]],
+    ["Lion / DCSL Strong 625 ml", "", [880]],
+    ["Lion / DCSL Stout 625 ml", "", [910]],
+    ["Carlsberg 625 ml", "", [750]],
+    ["Carlsberg Smooth 625 ml", "", [750]],
+    ["Guinness 625 ml", "", [980]],
+    ["GB 625 ml", "", [900]],
+    ["Calesberg Special Brew 625 ml", "", [970]],
+    ["Tiger Black Beer 625 ml", "", [870]],
+    ["Heineken Beer 625 ml", "", [780]]
+  ]}]},
+  { id: "wine", title: "Wine", groups: [{ cols: [""], items: [
+    ["House wine (red), bottle", "", [4600]],
+    ["House wine (white), bottle", "", [4600]]
+  ]}]},
+  { id: "arrack", title: "Arrack", groups: [{ cols: SP, items: [
+    ["Blue Sapphire", "", [170, 340, 2425, 4350]],
+    ["DCSL Black Opel", "", [195, 390, 2850, 5200]],
+    ["DCSL Extra Special", "", [170, 340, 2425, 4650]],
+    ["DCSL Old Arrack", "", [195, 390, 2850, 5300]],
+    ["DCSL V.S.O.A", "", [220, 440, 2950, 5400]],
+    ["DCSL White Label", "", [195, 390, 2850, 5300]],
+    ["DCSL Old Cask Premium", "", [195, 390, 2850, 5300]],
+    ["DCSL Double Distilled", "", [200, 400, 2950, 5500]],
+    ["IDL Gold Label", "", [210, 420, 3300, 6200]],
+    ["IDL Green Label", "", [170, 320, 2425, 4350]],
+    ["IDL Herbiza", "", [210, 420, 3300, 6100]],
+    ["IDL Old Reserve", "", [220, 440, 3300, 6100]],
+    ["IDL White Diamond G. Apple", "", [195, 370, 2850, 5200]],
+    ["IDL Black Lebal", "", [195, 370, 2850, 5200]],
+    ["IDL W. Diamond Arrack", "", [195, 370, 2850, 5200]],
+    ["IDL W. Diamond Lemon", "", [195, 370, 2850, 5200]],
+    ["Mango Arrack", "", [180, 360, 2700, 4900]],
+    ["Rockland Governors Choice", "", [195, 370, 2850, 5200]],
+    ["Rockland Extra Strong", "", [200, 400, 2950, 5400]],
+    ["Rockland V.X", "", [200, 400, 2950, 5400]],
+    ["Rockland Navy Seal Arrack", "", [180, 360, 2700, 4900]],
+    ["VAT 9", "", [220, 440, 3300, 6300]]
+  ]}]},
+  { id: "whisky", title: "Whisky", groups: [{ cols: SP, items: [
+    ["Johnnie Walker Black Label", "", [950, 1900, 14250, 28500]],
+    ["Johnnie Walker Red Label", "", [850, 1700, 12750, 25500]],
+    ["Rockland Old Keg", "", [220, 440, 3450, 6400]],
+    ["IDL V&A Whisky", "", [220, 440, 3450, 6400]],
+    ["VAT 69", "", [600, 1200, 9000, 18000]]
+  ]}]},
+  { id: "gin", title: "Gin", groups: [{ cols: SP, items: [
+    ["Gordon's", "", [700, 1400, 10500, 21000]],
+    ["IDL Ascot Lemon Gin", "", [230, 460, 3600, 6900]],
+    ["IDL Ascot Dry Gin", "", [230, 460, 3600, 6900]],
+    ["IDL Ascot Pick Dry Gin", "", [230, 460, 3600, 6900]],
+    ["Rockland Dry Gin", "", [230, 460, 3600, 6900]],
+    ["Rockland Lemon Gin", "", [230, 460, 3600, 6900]]
+  ]}]},
+  { id: "rum", title: "Rum", groups: [{ cols: SP, items: [
+    ["Captain Morgan", "", [650, 1300, 9750, 19500]],
+    ["IDL Calypso Red Rum", "", [230, 460, 3600, 6900]],
+    ["IDL Calypso White Rum", "", [230, 460, 3600, 6900]],
+    ["Rockland Red Rum", "", [230, 460, 3600, 6900]],
+    ["Rockland White Rum", "", [230, 460, 3600, 6900]]
+  ]}]},
+  { id: "brandy", title: "Brandy", groups: [{ cols: SP, items: [
+    ["DCSL Franklin", "", [220, 440, 3300, 6400]],
+    ["DCSL Galery", "", [220, 440, 3300, 6400]],
+    ["IDL Ritz Brandy", "", [220, 440, 3300, 6400]],
+    ["IDL Cherry Brandy", "", [230, 460, 3600, 6900]],
+    ["Rockland Hannappeir", "", [230, 460, 3600, 6900]],
+    ["Caverlier Brandy", "", [230, 460, 3600, 6900]]
+  ]}]},
+  { id: "vodka", title: "Vodka", groups: [{ cols: SP, items: [
+    ["Smirnoff Vodka", "", [635, 1250, 9375, 18750]],
+    ["Keruv Vodka", "", [240, 480, 3600, 6900]],
+    ["Eristoff Vodka", "", [280, 480, 3600, 6900]],
+    ["Celebration Vodka", "", [240, 480, 3600, 6900]]
+  ]}]},
+  { id: "smokes", title: "Smokes", groups: [{ cols: [""], items: [
+    ["Gold Leaf", "20 pack", [3400]],
+    ["Dunhill Switch", "20 pack", [3600]]
+  ]}]}
+];
+
+function fmt(n) { return n.toLocaleString("en-US"); }
+function colLabel(s) { var p = s.split("|"); return p.length > 1 ? p[0] + "<br>" + p[1] : s; }
+
+var menu = document.getElementById("menu");
+var chips = document.getElementById("chips");
+var html = "", chipHtml = "";
+SECTIONS.forEach(function (s) {
+  chipHtml += '<a href="#' + s.id + '" data-id="' + s.id + '">' + s.title + "</a>";
+  html += '<section id="' + s.id + '"><h2>' + s.title + "</h2>";
+  s.groups.forEach(function (g) {
+    var n = g.cols.length;
+    var hasHead = g.cols.some(function (c) { return c; });
+    html += '<div class="group' + (n > 3 ? ' dense' : '') + '" style="--n:' + n + '">';
+    if (g.label) html += '<p class="glabel">' + g.label + "</p>";
+    if (hasHead) {
+      html += '<div class="colhead" aria-hidden="true"><span></span>';
+      g.cols.forEach(function (c, i) { html += "<span" + (i === 0 ? "" : "") + ">" + colLabel(c) + "</span>"; });
+      html += "</div>";
+    }
+    g.items.forEach(function (it) {
+      html += '<div class="row" data-s="' + (it[0] + " " + it[1] + " " + (g.label || "")).toLowerCase() + '"><div class="name">' + it[0] + (it[1] ? "<small>" + it[1] + "</small>" : "") + "</div>";
+      var offset = n - it[2].length;
+      for (var k = 0; k < offset; k++) html += "<div></div>";
+      it[2].forEach(function (p) { html += '<div class="price">' + fmt(p) + "</div>"; });
+      html += "</div>";
+    });
+    html += "</div>";
+  });
+  html += "</section>";
+});
+menu.innerHTML = html;
+chips.innerHTML = chipHtml;
+
+/* Colhead: first label sits over the first price column; fix grid placement */
+Array.prototype.forEach.call(document.querySelectorAll(".colhead"), function (h) {
+  var spans = h.querySelectorAll("span");
+  for (var i = 1; i < spans.length; i++) spans[i].style.gridColumn = String(i + 1);
+  spans[0].style.gridColumn = "1";
+});
+
+/* Search */
+var q = document.getElementById("q");
+var empty = document.getElementById("empty");
+q.addEventListener("input", function () {
+  var t = q.value.trim().toLowerCase();
+  var any = false;
+  Array.prototype.forEach.call(menu.querySelectorAll("section"), function (sec) {
+    var secTitle = sec.querySelector("h2").textContent.toLowerCase();
+    var secShown = false;
+    Array.prototype.forEach.call(sec.querySelectorAll(".group"), function (grp) {
+      var shown = false;
+      Array.prototype.forEach.call(grp.querySelectorAll(".row"), function (row) {
+        var ok = !t || row.getAttribute("data-s").indexOf(t) > -1 || secTitle.indexOf(t) > -1;
+        row.hidden = !ok;
+        if (ok) shown = true;
+      });
+      grp.hidden = !shown;
+      if (shown) secShown = true;
+    });
+    sec.hidden = !secShown;
+    if (secShown) any = true;
+  });
+  empty.hidden = any;
+});
+
+/* Highlight the category in view */
+if ("IntersectionObserver" in window) {
+  var links = {};
+  Array.prototype.forEach.call(chips.querySelectorAll("a"), function (a) { links[a.getAttribute("data-id")] = a; });
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) {
+        Object.keys(links).forEach(function (k) { links[k].removeAttribute("aria-current"); });
+        var a = links[e.target.id];
+        a.setAttribute("aria-current", "true");
+        var box = chips, left = a.offsetLeft - 16;
+        try { box.scrollTo({ left: left, behavior: "smooth" }); } catch (err) { box.scrollLeft = left; }
+      }
+    });
+  }, { rootMargin: "-20% 0px -70% 0px" });
+  Array.prototype.forEach.call(menu.querySelectorAll("section"), function (s) { io.observe(s); });
+}
+</script>
+
+</html>
